@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_noblegroves/componentes/decoration_login.dart';
 
 class TelaLogin extends StatefulWidget {
-  TelaLogin({super.key});
+  const TelaLogin({super.key});
 
   @override
   State<TelaLogin> createState() => _TelaLoginState();
 }
 
 class _TelaLoginState extends State<TelaLogin> {
-  final formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
 
-  final formKeyEmail = GlobalKey<FormState>();
+  final _formKeyEmail = GlobalKey<FormState>();
 
   bool cadastrar = false;
+  String? senha;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +50,7 @@ class _TelaLoginState extends State<TelaLogin> {
             Padding(
               padding: const EdgeInsets.all(10.0),
               child: Form(
+                key: _formKey,
                 child: Center(
                   child: SingleChildScrollView(
                     child: Column(
@@ -60,55 +63,58 @@ class _TelaLoginState extends State<TelaLogin> {
                         const SizedBox(height: 8),
                         Visibility(
                           visible: cadastrar,
-                          child: TextFormField(decoration: const InputDecoration(
-                                label: Text("Nome Completo"),
-                              ),
-                          ),
-                        ),
-                        Form(
-                          key: formKeyEmail,
                           child: TextFormField(
-                            decoration: const InputDecoration(
-                              label: Text("E-mail"),
-                            ),
-                            validator: (String? value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Por favor, insira um endereço de e-mail.';
-                              } else if (!RegExp(
-                                      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-                                  .hasMatch(value)) {
-                                return 'Por favor, insira um e-mail válido.';
-                              }
-                              return null;
-                            },
+                            decoration:
+                                getLoginInputDecoration("Nome Completo"),
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Form(
-                          key: formKey,
+                        TextFormField(
+                          decoration: getLoginInputDecoration('E-mail'),
+                          validator: (String? value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, insira um endereço de e-mail.';
+                            } else if (!RegExp(
+                                    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                                .hasMatch(value)) {
+                              return 'Por favor, insira um e-mail válido.';
+                            }
+                            return null;
+                          },
+                        ),
+
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          decoration: getLoginInputDecoration('Senha'),
+                          validator: (String? value) {
+                            senha = value;
+                            if (value == null || value.isEmpty) {
+                              print('$value não inserido');
+                              return 'Por favor, insira a senha.';
+                            } else if (value.length < 6) {
+                              print('error $value');
+                              return 'Senha deve ter no mínimo 6 caracteres.';
+                            }
+                            print('$value senha ok');
+                            return null;
+                          },
+                          obscureText: true,
+                        ),
+                        const SizedBox(height: 8),
+                        Visibility(
+                          visible: cadastrar,
                           child: TextFormField(
-                            decoration: const InputDecoration(label: Text("Senha")),
+                            decoration:
+                                getLoginInputDecoration("Confirme a senha"),
                             validator: (String? value) {
-                              if (value == null || value.isEmpty) {
-                                print('$value não inserido');
-                                return 'Por favor, insira a senha.';
-                              } else if (value.length < 6) {
-                                print('error $value');
-                                return 'Senha deve ter no mínimo 6 caracteres.';
+                              if (value != senha) {
+                                return 'Senhas diferentes';
                               }
-                              print('$value ok');
+                              print('$value confirma senha');
                               return null;
                             },
                             obscureText: true,
                           ),
-                          
-                        ),
-                        Visibility(
-                          visible: cadastrar,
-                          child: TextFormField(
-                              decoration: const InputDecoration(label: Text("Confirme a senha")),
-                              obscureText: true,
-                            ),
                         ),
                         const SizedBox(height: 8),
                         Visibility(
@@ -121,26 +127,31 @@ class _TelaLoginState extends State<TelaLogin> {
                             ),
                           ),
                         ),
+                        
                         (ElevatedButton(
                           onPressed: () {
-                            if ((formKey.currentState?.validate() ?? false) &&
-                                (formKeyEmail.currentState?.validate() ?? false)) {
+                            if (_formKey.currentState?.validate() ?? false) {
                               Navigator.pushNamed(context, '/home');
                             }
                           },
                           style: const ButtonStyle(
-                            minimumSize: MaterialStatePropertyAll(Size(250, 40)),
-                            backgroundColor: MaterialStatePropertyAll(Colors.white),
+                            minimumSize:
+                                MaterialStatePropertyAll(Size(250, 40)),
+                            backgroundColor:
+                                MaterialStatePropertyAll(Colors.white),
                           ),
-                          child: Text((cadastrar)? 'Cadastrar': 'Entrar',
-                            style:
-                                TextStyle(color: Color.fromRGBO(0, 242, 93, 0.953)),
+                          child: Text(
+                            (cadastrar) ? 'Cadastrar' : 'Entrar',
+                            style: const TextStyle(
+                                color: Color.fromRGBO(0, 242, 93, 0.953)),
                           ),
                         )),
-                        Divider(),
+                        const Divider(),
+
                         ElevatedButton(
                           style: const ButtonStyle(
-                              minimumSize: MaterialStatePropertyAll(Size(250, 40)),
+                              minimumSize:
+                                  MaterialStatePropertyAll(Size(250, 40)),
                               backgroundColor: MaterialStatePropertyAll(
                                   Color.fromRGBO(0, 242, 93, 0.953)),
                               side: MaterialStatePropertyAll(BorderSide(
@@ -149,12 +160,13 @@ class _TelaLoginState extends State<TelaLogin> {
                                   style: BorderStyle.solid))),
                           onPressed: () {
                             setState(() {
-                                cadastrar = !cadastrar;
+                              cadastrar = !cadastrar;
                             });
                           },
-                          child:  Text((cadastrar)? 'Já tenho uma conta' : 'Criar conta',
-                            style:
-                                TextStyle(color: Color.fromRGBO(255, 255, 255, 1)),
+                          child: Text(
+                            (cadastrar) ? 'Já tenho uma conta' : 'Criar conta',
+                            style: const TextStyle(
+                                color: Color.fromRGBO(255, 255, 255, 1)),
                           ),
                         ),
                       ],
@@ -165,5 +177,11 @@ class _TelaLoginState extends State<TelaLogin> {
             ),
           ],
         ));
+
+        
   }
+  botaoPrincipal(){
+
+          
+        }
 }
