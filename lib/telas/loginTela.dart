@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_noblegroves/componentes/decoration_login.dart';
+import 'package:flutter_noblegroves/services/auth_services.dart';
 
 class TelaLogin extends StatefulWidget {
   const TelaLogin({super.key});
@@ -14,7 +15,12 @@ class _TelaLoginState extends State<TelaLogin> {
   final _formKeyEmail = GlobalKey<FormState>();
 
   bool cadastrar = false;
-  String? senha;
+
+  final TextEditingController _controllerEmail = TextEditingController();
+  final TextEditingController _controllerNome = TextEditingController();
+  final TextEditingController _controllerSenha = TextEditingController();
+
+  AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -64,12 +70,14 @@ class _TelaLoginState extends State<TelaLogin> {
                         Visibility(
                           visible: cadastrar,
                           child: TextFormField(
+                            controller: _controllerNome,
                             decoration:
                                 getLoginInputDecoration("Nome Completo"),
                           ),
                         ),
                         const SizedBox(height: 8),
                         TextFormField(
+                          controller: _controllerEmail,
                           decoration: getLoginInputDecoration('E-mail'),
                           validator: (String? value) {
                             if (value == null || value.isEmpty) {
@@ -82,12 +90,11 @@ class _TelaLoginState extends State<TelaLogin> {
                             return null;
                           },
                         ),
-
                         const SizedBox(height: 8),
                         TextFormField(
+                          controller: _controllerSenha,
                           decoration: getLoginInputDecoration('Senha'),
                           validator: (String? value) {
-                            senha = value;
                             if (value == null || value.isEmpty) {
                               print('$value não inserido');
                               return 'Por favor, insira a senha.';
@@ -107,7 +114,7 @@ class _TelaLoginState extends State<TelaLogin> {
                             decoration:
                                 getLoginInputDecoration("Confirme a senha"),
                             validator: (String? value) {
-                              if (value != senha) {
+                              if (value != _controllerSenha.text) {
                                 return 'Senhas diferentes';
                               }
                               print('$value confirma senha');
@@ -127,12 +134,9 @@ class _TelaLoginState extends State<TelaLogin> {
                             ),
                           ),
                         ),
-                        
                         (ElevatedButton(
                           onPressed: () {
-                            if (_formKey.currentState?.validate() ?? false) {
-                              Navigator.pushNamed(context, '/home');
-                            }
+                            botaoPrincipal();
                           },
                           style: const ButtonStyle(
                             minimumSize:
@@ -147,7 +151,6 @@ class _TelaLoginState extends State<TelaLogin> {
                           ),
                         )),
                         const Divider(),
-
                         ElevatedButton(
                           style: const ButtonStyle(
                               minimumSize:
@@ -177,11 +180,15 @@ class _TelaLoginState extends State<TelaLogin> {
             ),
           ],
         ));
-
-        
   }
-  botaoPrincipal(){
 
-          
-        }
+  botaoPrincipal() {
+    String nome = _controllerNome.text;
+    String senha = _controllerSenha.text;
+    String email = _controllerEmail.text;
+    if (_formKey.currentState?.validate() ?? false) {
+      _authService.createUser(nome: nome, senha: senha, email: email);
+      Navigator.pushNamed(context, '/home');
+    }
+  }
 }
