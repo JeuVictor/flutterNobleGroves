@@ -1,9 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_noblegroves/firebase_options.dart';
 import 'package:flutter_noblegroves/telas/homeTela.dart';
 import 'package:flutter_noblegroves/telas/loginTela.dart';
-import 'package:flutter_noblegroves/telas/registroTela.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,13 +18,26 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      routes: {
-        '/login': (context) => TelaLogin(),
-        '/home': (context) => HomeTela(),
-        '/registro': (context) => RegistroTela()
-      },
-      home: TelaLogin(),
+    return const MaterialApp(
+      home: routesTelas(),
     );
+  }
+}
+
+class routesTelas extends StatelessWidget {
+  const routesTelas({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.userChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return const HomeTela();
+          } else {
+            return TelaLogin();
+          }
+          
+        });
   }
 }

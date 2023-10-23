@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_noblegroves/componentes/decoration_login.dart';
+import 'package:flutter_noblegroves/comum/my_snackbar.dart';
 import 'package:flutter_noblegroves/services/auth_services.dart';
 
 class TelaLogin extends StatefulWidget {
@@ -187,8 +188,33 @@ class _TelaLoginState extends State<TelaLogin> {
     String senha = _controllerSenha.text;
     String email = _controllerEmail.text;
     if (_formKey.currentState?.validate() ?? false) {
-      _authService.createUser(nome: nome, senha: senha, email: email);
-      Navigator.pushNamed(context, '/home');
+      print(cadastrar);
+      if (cadastrar) {
+        _authService.createUser(nome: nome, senha: senha, email: email).then(
+          (String? error) {
+            if (mounted) {
+              if (error != null) {
+                showSnackBar(context: context, texto: error);
+              } else if (error == null) {
+                showSnackBar(
+                    context: context,
+                    texto: 'Cadastro realizado com sucesso',
+                    isError: false);
+              }
+            } else {
+              print(' error no $mounted');
+            }
+          },
+        );
+      } else {
+        _authService
+            .loginUser(email: email, senha: senha)
+            .then((String? error) {
+          if (error != null) {
+            showSnackBar(context: context, texto: error);
+          }
+        });
+      }
     }
   }
 }
